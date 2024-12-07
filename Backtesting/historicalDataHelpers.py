@@ -3,6 +3,7 @@ from coinbase.rest import RESTClient
 from TradingBot.config import *
 from enum import Enum
 import time
+from datetime import datetime, timedelta, timezone
 
 class TimeInterval(Enum):
     ONE_MINUTE = "ONE_MINUTE"
@@ -14,11 +15,11 @@ class TimeInterval(Enum):
 
 # Function to convert days ago to Unix timestamp
 def days_ago_to_unix(days):
-    return str(int((datetime.utcnow() - timedelta(days=days)).timestamp()))
+    return str(int((datetime.now(timezone.utc) - timedelta(days=days)).timestamp()))
 
 # Get current Unix timestamp
 def current_unix_timestamp():
-    return str(int(datetime.utcnow().timestamp()))
+    return str(int(datetime.now(timezone.utc).timestamp()))
 
 def getHistoricalData(currency_pair, interval, start=0, end=0, days_ago=None):
 

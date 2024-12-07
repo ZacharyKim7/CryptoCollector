@@ -1,7 +1,9 @@
-from Algorithms.algorithm import Algorithm
+import sys
+sys.path.append('../')
+from algorithm import Algorithm
 from configBackTest import *
-from Algorithms.getHistoricalKlines import get_historical_klines
-from Algorithms.grabTestData import *
+from getHistoricalKlines import get_historical_klines
+from grabTestData import *
 from binance.client import Client
 
 class GoodTrade:

@@ -1,7 +1,9 @@
 import time
+import sys
+sys.path.append('../')
 from TradingBot.config import *
 from Backtesting.historicalDataHelpers import TimeInterval, getHistoricalData
-from Algorithms.algorithm import Algorithm, AlgorithmConfiguration
+from algorithm import Algorithm, AlgorithmConfiguration
 from coinbase.rest import RESTClient
 import webSocketCallbacks
 

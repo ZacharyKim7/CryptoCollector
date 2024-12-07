@@ -1,6 +1,8 @@
-from TradingBot.config import *
+import sys
+sys.path.append('../')
+from configBackTest import *
 import time
-from Algorithms.algorithm import Algorithm, AlgorithmConfiguration
+from algorithm import Algorithm, AlgorithmConfiguration
 from Backtesting.configBackTest import *
 import json
 import multiprocessing
