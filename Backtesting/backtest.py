@@ -6,7 +6,10 @@ from algorithm import Algorithm, AlgorithmConfiguration
 from Backtesting.configBackTest import *
 import json
 import multiprocessing
+import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class TestUser:
     def __init__(self, balance, tradeAmount):
@@ -18,6 +21,7 @@ class TestUser:
         self.totalTrades = 0
         self.totalWins = 0
         self.totalLoss = 0
+        logging.info(f'TestUser initialized with balance {balance} and trade amount {tradeAmount}')
 
     def buyShares(self, price):
         if not self.holding:
@@ -30,6 +34,7 @@ class TestUser:
             self.balance -= self.tradeAmount
             self.holding = True
             self.totalTrades += 1
+            logging.info(f'Bought shares at price {price}')
             return True
         return False
 
@@ -44,6 +49,7 @@ class TestUser:
                 self.totalLoss += 1
             elif self.purchasePrice < price:
                 self.totalWins += 1
+            logging.info(f'Sold shares at price {price}')
             return True
         return False
 
@@ -52,17 +58,21 @@ class TestUser:
 
 
 def main():
-    with open('XRP.json', 'r') as json_file:
-        allData = json.load(json_file)
-        highs = [float(x['high']) for x in allData]
-        lows = [float(x['low']) for x in allData]
-        closes = [float(x['close']) for x in allData]
-        volumes = [float(x['volume']) for x in allData]
-        start_time = time.time()
-        beginTest(highs, lows, closes, volumes)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Elapsed time: {elapsed_time} seconds")
+    logging.info('Starting backtest')
+    try:
+        with open('XRP.json', 'r') as json_file:
+            allData = json.load(json_file)
+            highs = [float(x['high']) for x in allData]
+            lows = [float(x['low']) for x in allData]
+            closes = [float(x['close']) for x in allData]
+            volumes = [float(x['volume']) for x in allData]
+            start_time = time.time()
+            beginTest(highs, lows, closes, volumes)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            logging.info(f'Backtest completed in {elapsed_time} seconds')
+    except Exception as e:
+        logging.error(f'Error during backtest: {e}')
 
 def vwap_buy_analysis(center_value, count):
     value = [round(center_value + 0.01 * i, 2) for i in range(0, count + 1)]
@@ -73,7 +83,7 @@ def vwap_sell_analysis(center_value, count):
     return value
 
 def beginTest(highs, lows, closes, volumes):
-
+    logging.info('Beginning test with multiple configurations')
     vwapBuys = [1.0, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07]
     rsiBuys = [15,25,35,False]
     maBuys = [False]
@@ -137,55 +147,15 @@ def beginTest(highs, lows, closes, volumes):
 
     for process in processes:
         process.join()
-        print("1")
-    print("runn")
-    # for algoConfig in configurations:
-    #     percentage_complete = round((float(counter) / (len(configurations))) * 100, 2)
-    #     print(f"Percentage Complete: {percentage_complete}%")
-    #     testUser = TestUser(10000, 10000)
-    #     algorithm = Algorithm(first100Highs=highs[:100], first100Lows=lows[:100], first100Closes=closes[:100], first100Volumes=volumes[:100], configuration=algoConfig)
-    #     for interval in range(100, len(closes)):
-    #         algorithm.inform(highs[interval], lows[interval], closes[interval], volumes[interval])
-    #         if algorithm.shouldBuy():
-    #             testUser.buyShares(closes[interval])
-    #         elif algorithm.shouldSell(testUser.purchasePrice):
-    #             testUser.sellShares(closes[interval])
+        logging.info('Process completed')
 
-    #     counter += 1
-        
-    #     if((testUser.portfolioValue(closes[-1]) / 10000 - 1) * 100 >= 0.0):
-    #         tradeResult = {
-    #             "Total Percentage": (testUser.portfolioValue(closes[-1]) / 10000 - 1) * 100,
-    #             "Total Trades": testUser.totalTrades,
-    #             "Total Wins": testUser.totalWins,
-    #             "Total Loss": testUser.totalLoss,
-    #             "Vwap Buy": algoConfig.vwapBuy,
-    #             "Vwap Sell": algoConfig.vwapSell,
-    #             "Ma Buy": algoConfig.maBuy,
-    #             "Ma Sell": algoConfig.maSell,
-    #             "Rsi Buy": algoConfig.rsiBuy,
-    #             "Rsi Sell": algoConfig.rsiSell,
-    #         }
-    #         tradeList.append(tradeResult)
+    logging.info('All processes completed')
+
     results_list = list(results_list)
-    results_list.sort(key=lambda x:x["Total Percentage"])
-    print("232434")
+    results_list.sort(key=lambda x:x['Total Percentage'])
+    logging.info('Results sorted by total percentage gain')
     for eachTrade in results_list:
-        print('=' * 20)
-        print(f"Vwap Buy: {eachTrade["Vwap Buy"]}")
-        print(f"Vwap Sell: {eachTrade["Vwap Sell"]}")
-        print(f"Ma Buy: {eachTrade["Ma Buy"]}")
-        print(f"Ma Sell: {eachTrade["Ma Sell"]}")
-        print(f"Rsi Buy: {eachTrade["Rsi Buy"]}")
-        print(f"Rsi Sell: {eachTrade["Rsi Sell"]}")
-        print(f"Stop Loss: {eachTrade["Stop Loss"]}")
-        print(f"Wait After Loss: {eachTrade["Wait After Loss"]}")
-        print(f"Vwap Window: {eachTrade["Vwap Window"]}")
-        print(f"Percentage Gain: {eachTrade["Total Percentage"]}%")
-        print(f"Total trades: {eachTrade["Total Trades"]}")
-        print(f"Total Wins: {eachTrade["Total Wins"]}")
-        print(f"Total Loss: {eachTrade["Total Loss"]}")
-        print('*' * 20)
+        logging.info(f"Trade result: {eachTrade}")
 
 def thread_function(configurations, highs, lows, closes, volumes, results_list):
     tradeList = []
