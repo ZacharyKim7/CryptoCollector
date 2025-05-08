@@ -57,26 +57,32 @@ class Algorithm:
         if self.timeSinceLoss:
             self.timeSinceLoss += 1
 
-    def shouldBuy(self):
-        # Buy when the current close sinks deep below the vwap
+    def identify_support_resistance(self):
+        # Ensure self.vwap is a list of VWAP values
+        support = min(self.vwap)
+        resistance = max(self.vwap)
+        return support, resistance
 
-        vwapCheck = not self.configuration.vwapBuy or self.vwap >= self.configuration.vwapBuy * self.closes[-1]
+    def shouldBuy(self):
+        # Buy slightly above the support level
+        support, _ = self.identify_support_resistance()
+        vwapCheck = self.closes[-1] < support * 1.01  # Buy 1% above support
         maCheck = not self.configuration.maBuy or self.ma >= self.configuration.maBuy * self.closes[-1]
         rsiCheck = not self.configuration.rsiBuy or self.rsi <= self.configuration.rsiBuy
 
         waitAfterLossCheck = not self.timeSinceLoss or self.timeSinceLoss >= self.configuration.waitAfterLoss
         if waitAfterLossCheck:
             self.timeSinceLoss = 0
-        
+
         if vwapCheck and maCheck and rsiCheck and waitAfterLossCheck:
             return True
         else:
             return False
-        
-    def shouldSell(self, purchasePrice):
-        # Sell when the current close approaches the vwap
 
-        vwapCheck = not self.configuration.vwapSell or self.vwap * self.configuration.vwapSell <= self.closes[-1]
+    def shouldSell(self, purchasePrice):
+        # Sell slightly below the resistance level
+        _, resistance = self.identify_support_resistance()
+        vwapCheck = self.closes[-1] > resistance * 0.99  # Sell 1% below resistance
         maCheck = not self.configuration.maSell or self.ma * self.configuration.maSell <= self.closes[-1]
         rsiCheck = not self.configuration.rsiSell or self.rsi >= self.configuration.rsiSell
 
@@ -88,7 +94,13 @@ class Algorithm:
             return False
 
     def calculate_vwap(self, volumes, typicals, window):
-        return numpy.sum(numpy.multiply(typicals[-(window):], volumes[-(window):]))/ numpy.sum(volumes[-(window):])
+        vwap_values = []
+        for i in range(window, len(typicals) + 1):
+            window_typicals = typicals[i-window:i]
+            window_volumes = volumes[i-window:i]
+            vwap = numpy.sum(numpy.multiply(window_typicals, window_volumes)) / numpy.sum(window_volumes)
+            vwap_values.append(vwap)
+        return vwap_values
     
     def calculate_ma(self, window):
         weights = numpy.repeat(1.0, window) / window

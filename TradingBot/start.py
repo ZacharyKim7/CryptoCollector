@@ -1,11 +1,15 @@
 import time
 import sys
+import logging
 sys.path.append('../')
 from TradingBot.config import *
 from Backtesting.historicalDataHelpers import TimeInterval, getHistoricalData
 from algorithm import Algorithm, AlgorithmConfiguration
 from coinbase.rest import RESTClient
 import webSocketCallbacks
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class User:
     def __init__(self, tradeValue, currency):
@@ -14,6 +18,7 @@ class User:
         self.purchasePrice = 0
         self.tradeValue = tradeValue
         self.algorithm = self.setupAlgorithm(currency)
+        logging.info(f'User initialized for {currency} with trade value {tradeValue}')
 
     def setupAlgorithm(self, currency):
         allData = getHistoricalData(currency, TimeInterval.THIRTY_MINUTE.value, days_ago=3)[-101:-1]
@@ -39,16 +44,18 @@ class User:
     def buy(self, price):
         self.purchasePrice = price
         self.holding = True
+        logging.info(f'Bought at price {price}')
     
     def sell(self):
         self.holding = False
+        logging.info('Sold holdings')
 
 def main():
     # Establish initial websocket or data-fetching setup
     webSocketSetup()
 
 def webSocketSetup():
-    print("Setting up websocket")
+    logging.info("Setting up websocket")
 
     lastSeenCandles = {}
     users = {}
@@ -67,8 +74,8 @@ def webSocketSetup():
                     last_closes = users[currency].client.get_public_candles(currency, str(start_timestamp),str(end_timestamp),'THIRTY_MINUTE')['candles']
                     candle = last_closes[1]
                     break
-                except:
-                    print(f"Failure to fetch latest candle for {currency}, trying again...")
+                except Exception as e:
+                    logging.error(f"Failure to fetch latest candle for {currency}: {e}")
 
             if not currency in lastSeenCandles:
                 lastSeenCandles[currency] = candle['start']

@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 from coinbase.rest import RESTClient
-from TradingBot.config import *
 from enum import Enum
 import time
 from datetime import datetime, timedelta, timezone
+
+import sys
+sys.path.append('../')
+from TradingBot.config import *
 
 class TimeInterval(Enum):
     ONE_MINUTE = "ONE_MINUTE"
