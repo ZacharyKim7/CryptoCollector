@@ -1,0 +1,6 @@
+python-binance
+requests
+ta
+websocket-client
+coinbase-advanced-py
+dotenv
