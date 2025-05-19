@@ -27,7 +27,6 @@ class User:
         closes = [float(x['close']) for x in allData]
         volumes = [float(x['volume']) for x in allData]
 
-        # MOVE TO DIFFERENT AREA
         config = AlgorithmConfiguration(
             vwapBuy=1.03,
             rsiBuy=1.03,
