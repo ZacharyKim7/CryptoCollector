@@ -35,7 +35,7 @@ def getHistoricalData(currency_pair, interval, start=0, end=0, days_ago=None):
 
     client = RESTClient(api_key=API_KEY, api_secret=API_SECRET)
     # Define the maximum number of candlesticks per request
-    max_candles_per_request = 300
+    max_candles_per_request = 350
 
     # Calculate the interval in seconds
     if interval == TimeInterval.ONE_MINUTE.value:
