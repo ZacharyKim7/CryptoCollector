@@ -1,1 +1,7 @@
 .env
+.venv/
+__pycache__/
+*.pyc
+cryptocollector.db
+backtest_results/
+.pytest_cache/

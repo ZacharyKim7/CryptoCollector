@@ -1,0 +1,19 @@
+[project]
+name = "cryptocollector"
+version = "0.1.0"
+description = "Regime-filtered swing trading bot for Coinbase: backtesting and paper trading around volatile, range-bound coins."
+requires-python = ">=3.12"
+dependencies = [
+    "coinbase-advanced-py>=1.7.0",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.uv]
+package = false
