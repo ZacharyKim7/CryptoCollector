@@ -11,8 +11,10 @@ RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "backtest_resu
 
 
 def _load_best_configs_from_latest_backtest() -> tuple[dict, dict]:
-    """Load each watchlist symbol's best (highest total_return_pct) config
-    from the most recent cli/run_backtest.py CSV output, if one exists."""
+    """Load each watchlist symbol's best config from the most recent
+    cli/run_backtest.py CSV output, if one exists. Ranked by TEST-slice
+    return (out-of-sample), not train return - a config that only looked
+    good on the data it was tuned on has no business running live."""
     csvs = sorted(glob.glob(os.path.join(RESULTS_DIR, "backtest_*.csv")))
     if not csvs:
         return {}, {}
@@ -21,8 +23,8 @@ def _load_best_configs_from_latest_backtest() -> tuple[dict, dict]:
     with open(csvs[-1], newline="") as f:
         for row in csv.DictReader(f):
             symbol = row["symbol"]
-            return_pct = float(row["total_return_pct"])
-            if symbol not in best_by_symbol or return_pct > float(best_by_symbol[symbol]["total_return_pct"]):
+            return_pct = float(row["test_total_return_pct"])
+            if symbol not in best_by_symbol or return_pct > float(best_by_symbol[symbol]["test_total_return_pct"]):
                 best_by_symbol[symbol] = row
 
     algo_configs, regime_configs = {}, {}

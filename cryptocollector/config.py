@@ -20,7 +20,10 @@ NATIVE_GRANULARITY = "TWO_HOUR"
 TARGET_TIMEFRAME = "4h"  # pandas resample rule
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "cryptocollector.db")
-DEFAULT_BACKFILL_DAYS = 180
+# Multi-year history, not months: the whole point is to see the strategy
+# perform across several distinct volatile/sideways vs. trending cycles,
+# not just whatever happened in the last 6 months.
+DEFAULT_BACKFILL_DAYS = 1825
 
 # Simulated trading costs, carried over from the original backtester.
 MAKER_FEES = 0.005
@@ -31,9 +34,14 @@ SLIPPAGE_PCT = 0.0
 POLL_INTERVAL_SECONDS = 300
 
 # --- Regime detector defaults (tuned via backtest grid search, not by hand) ---
-REGIME_ATR_WINDOW = 14
+# 90 periods on 4h candles is ~15 days - wide enough to read as a macro
+# sideways/volatile regime rather than reacting to every few-day wiggle
+# (the original 14-period/~2.3-day window was too short: it flagged plenty
+# of periods within a real multi-month ADA range as "trending" just because
+# of short-lived directional pushes inside that range).
+REGIME_ATR_WINDOW = 90
 REGIME_MIN_ATR_PCT = 0.02
-REGIME_ADX_WINDOW = 14
+REGIME_ADX_WINDOW = 90
 REGIME_MAX_ADX = 20
 
 # --- Mean-reversion strategy defaults ---

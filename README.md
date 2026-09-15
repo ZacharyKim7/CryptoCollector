@@ -1,4 +1,5 @@
 # CryptoCollector
+# claude --resume 121370e9-c905-4637-ab16-8b3d4a108cbd
 
 An automated crypto swing-trading bot for Coinbase, built around one specific, deliberately narrow idea: **only trade a coin when it's both volatile and moving sideways.**
 

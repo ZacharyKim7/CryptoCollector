@@ -52,7 +52,7 @@ class Algorithm:
         self.configuration = configuration
         self.typicals = self._calculate_typicals()
         self.vwap = self.calculate_vwap(self.volumes, self.typicals, configuration.vwapWindow)
-        self.ma = self.calculate_ma(configuration.maWindow)[-1]
+        self.ma = self.calculate_ma(configuration.maWindow)
         self._rsiAvgGain, self._rsiAvgLoss = self._seed_rsi(configuration.rsiWindow)
         self.rsi = self._rsi_from_averages(self._rsiAvgGain, self._rsiAvgLoss)
 
@@ -65,7 +65,7 @@ class Algorithm:
         self.volumes = numpy.append(self.volumes, newVolume)[1:]
         self.typicals = self._calculate_typicals()
         self.vwap = self.calculate_vwap(self.volumes, self.typicals, self.configuration.vwapWindow)
-        self.ma = self.calculate_ma(self.configuration.maWindow)[-1]
+        self.ma = self.calculate_ma(self.configuration.maWindow)
         self._update_rsi(prevClose, newClose)
 
         if self.timeSinceLoss:
@@ -102,8 +102,10 @@ class Algorithm:
         return numpy.sum(numpy.multiply(typicals[-window:], volumes[-window:])) / numpy.sum(volumes[-window:])
 
     def calculate_ma(self, window):
-        weights = numpy.repeat(1.0, window) / window
-        return numpy.convolve(self.closes, weights, "valid")
+        # Only ever the trailing value is used, so average just the trailing
+        # window instead of convolving over the whole (now much larger)
+        # rolling buffer for a result we'd immediately discard.
+        return numpy.mean(self.closes[-window:])
 
     def _seed_rsi(self, window):
         deltas = numpy.diff(self.closes[-(window + 1):])

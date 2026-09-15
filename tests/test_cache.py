@@ -46,3 +46,24 @@ def test_resample_aggregates_pairs_of_two_hour_candles_into_four_hour_bars(tmp_p
     assert bar["low"] == 0.5
     assert bar["volume"] == 25
     assert int(bar["start_ts"]) == 0
+
+
+def test_resample_preserves_real_world_epoch_timestamps(tmp_path):
+    # Regression test: t=0 alone can't catch a scaling bug in the start_ts
+    # reconstruction (dividing by the wrong power of ten still yields 0 for
+    # an input of 0). Use realistic ~2021-era timestamps so a bug that
+    # corrupts everything except exactly t=0 actually gets caught.
+    cache = CandleCache(db_path=os.path.join(tmp_path, "test.db"))
+    base = 1630224000  # 2021-08-29 08:00:00 UTC
+    candles = [
+        _candle(base, open_=1, high=1, low=1, close=1, volume=1),
+        _candle(base + 7200, open_=1, high=1, low=1, close=1, volume=1),
+        _candle(base + 14400, open_=1, high=1, low=1, close=1, volume=1),
+        _candle(base + 21600, open_=1, high=1, low=1, close=1, volume=1),
+    ]
+    cache.upsert_candles("ADA-USD", "TWO_HOUR", candles)
+
+    resampled = cache.get_candles("ADA-USD", timeframe="4h", granularity="TWO_HOUR")
+    start_timestamps = resampled["start_ts"].astype(int).tolist()
+
+    assert start_timestamps == [base, base + 14400]

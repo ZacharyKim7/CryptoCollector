@@ -140,5 +140,12 @@ class CandleCache:
             }
         )
         resampled = resampled.dropna(subset=["open", "high", "low", "close"])
-        resampled["start_ts"] = (resampled.index.view("int64") // 10**9).astype(int)
+        # NOTE: resampled.index.view("int64") is NOT safe here - pandas'
+        # datetime64 storage resolution varies (s/ms/us/ns depending on how
+        # the index was constructed), so a raw int64 view combined with a
+        # fixed "// 10**9" silently produces garbage for anything other than
+        # nanosecond resolution. Subtracting the epoch and dividing by a
+        # Timedelta is resolution-agnostic and always correct.
+        epoch = pd.Timestamp("1970-01-01", tz="UTC")
+        resampled["start_ts"] = ((resampled.index - epoch) // pd.Timedelta(seconds=1)).astype(int)
         return resampled.reset_index(drop=True)

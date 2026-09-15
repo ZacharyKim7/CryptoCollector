@@ -7,7 +7,11 @@ from cryptocollector.strategy.algorithm import Algorithm, AlgorithmConfiguration
 from cryptocollector.strategy.decision import evaluate
 from cryptocollector.strategy.regime import RegimeConfig, RegimeDetector
 
-SEED_LENGTH = 100
+# Must comfortably exceed the regime detector's atrWindow/adxWindow (see
+# config.REGIME_ATR_WINDOW/REGIME_ADX_WINDOW) so the initial Wilder-smoothed
+# ADX estimate is seeded from enough directional-move history to be
+# meaningful, not just a handful of samples.
+SEED_LENGTH = 200
 
 
 @dataclass
